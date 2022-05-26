@@ -81,7 +81,10 @@ class InceptionDistiller(BaseInceptionDistiller):
         self.best_fid = 1e9
         self.best_mIoU = -1e9
         self.fids, self.mIoUs = [], []
-        self.npz = np.load(opt.real_stat_path)
+        if opt.real_stat_path:
+            self.npz = np.load(opt.real_stat_path)
+        else:
+            print('skip opt.real_stat_path')
         model_profiling(getattr(self.netG_teacher, 'module',
                                 self.netG_teacher),
                         self.opt.data_height,

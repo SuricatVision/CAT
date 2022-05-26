@@ -31,7 +31,7 @@ class BaseInceptionDistiller(BaseModel):
         assert is_train
         parser = super(BaseInceptionDistiller,
                        BaseInceptionDistiller).modify_commandline_options(
-                           parser, is_train)
+            parser, is_train)
         parser.add_argument('--teacher_netG',
                             type=str,
                             default='inception_9blocks',
@@ -54,7 +54,7 @@ class BaseInceptionDistiller(BaseModel):
             help='the base number of filters of the student generator')
         parser.add_argument('--restore_teacher_G_path',
                             type=str,
-                            required=True,
+                            required=False,
                             help='the path to restore the teacher generator')
         parser.add_argument('--restore_student_G_path',
                             type=str,
@@ -207,31 +207,34 @@ class BaseInceptionDistiller(BaseModel):
         }, {
             'params': itertools.chain(*G_params)
         }],
-                                lr=opt.lr,
-                                betas=(opt.beta1, 0.999))
+            lr=opt.lr,
+            betas=(opt.beta1, 0.999))
         self.optimizer_D = torch.optim.Adam(self.netD.parameters(),
                                             lr=opt.lr,
                                             betas=(opt.beta1, 0.999))
         self.optimizers.append(self.optimizer_G)
         self.optimizers.append(self.optimizer_D)
-
-        self.eval_dataloader = create_eval_dataloader(self.opt,
-                                                      direction=opt.direction)
-
+        try:
+            self.eval_dataloader = create_eval_dataloader(self.opt,
+                                                          direction=opt.direction)
+        except:
+            print('skip dataloader')
         block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[2048]
         self.inception_model = InceptionV3([block_idx])
         self.inception_model.to(self.device)
         self.inception_model.eval()
 
-        if 'cityscapes' in opt.dataroot:
+        if opt.dataroot is not None and 'cityscapes' in opt.dataroot:
             self.drn_model = DRNSeg('drn_d_105', 19, pretrained=False)
             util.load_network(self.drn_model, opt.drn_path, verbose=False)
             if len(opt.gpu_ids) > 0:
                 self.drn_model.to(self.device)
                 self.drn_model = nn.DataParallel(self.drn_model, opt.gpu_ids)
             self.drn_model.eval()
-
-        self.npz = np.load(opt.real_stat_path)
+        if opt.real_stat_path:
+            self.npz = np.load(opt.real_stat_path)
+        else:
+            print('skip opt.real_stat_path')
         self.is_best = False
 
     def setup(self, opt, verbose=True):
@@ -343,8 +346,10 @@ class BaseInceptionDistiller(BaseModel):
                       verbose=True,
                       teacher_only=False,
                       restore_pretrain=True):
-        util.load_network(self.netG_teacher, self.opt.restore_teacher_G_path,
-                          verbose)
+        if self.opt.restore_teacher_G_path:
+            util.load_network(self.netG_teacher, self.opt.restore_teacher_G_path, verbose)
+        else:
+            print('skip util.load_network(self.netG_teacher, self.opt.restore_teacher_G_path,verbose)')
         if self.opt.restore_student_G_path is not None:
             util.load_network(self.netG_student,
                               self.opt.restore_student_G_path, verbose)

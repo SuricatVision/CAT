@@ -22,7 +22,7 @@ class BaseOptions:
         """Define the common options that are used in both training and test."""
         parser.add_argument(
             '--dataroot',
-            required=True,
+            required=False,
             help=
             'path to images (should have subfolders trainA, trainB, valA, valB, train, val, etc)'
         )

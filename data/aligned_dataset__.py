@@ -20,10 +20,10 @@ class AlignedDataset(BaseDataset):
         """
         print('-----------  AlignedDataset')
         BaseDataset.__init__(self, opt)
-        self.dir_A=f'{opt.dataroot}/{opt.phase}/train_A'
-        self.A_paths = sorted(os.listdir(self.dir_A))  # get image paths
-        if opt.phase=='val':
-            self.A_paths=self.A_paths[:1000]
+        self.dir_AB = os.path.join(opt.dataroot,
+                                   opt.phase)  # get the image directory
+        print( self.dir_AB)
+        self.AB_paths = sorted(make_dataset(self.dir_AB))  # get image paths
 
         assert (self.opt.load_size >= self.opt.crop_size
                 )  # crop_size should be smaller than the size of loaded image
@@ -32,16 +32,19 @@ class AlignedDataset(BaseDataset):
         self.cache = {}
 
     def __getitem__(self, index):
-        A_path = f'{self.dir_A}/{self.A_paths[index]}'
-        B_path = f'{self.dir_A}/{self.A_paths[index]}'.replace('_A','_B')
+        AB_path = self.AB_paths[index]
+        if not self.opt.load_in_memory or self.cache.get(index) is None:
+            AB = Image.open(AB_path).convert('RGB')
+            if self.opt.load_in_memory:
+                self.cache[index] = AB
+        else:
+            AB = self.cache[index]
 
-        A = Image.open(A_path).convert('RGB')
-        B = Image.open(B_path).convert('RGB')
         # split AB image into A and B
-        # w, h = AB.size
-        # w2 = int(w / 2)
-        # A = AB.crop((0, 0, w2, h))
-        # B = AB.crop((w2, 0, w, h))
+        w, h = AB.size
+        w2 = int(w / 2)
+        A = AB.crop((0, 0, w2, h))
+        B = AB.crop((w2, 0, w, h))
 
         # apply the same transform to both A and B
         transform_params = get_params(self.opt, A.size)
@@ -54,11 +57,11 @@ class AlignedDataset(BaseDataset):
 
         A = A_transform(A)
         B = B_transform(B)
-        return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
+        return {'A': A, 'B': B, 'A_paths': AB_path, 'B_paths': AB_path}
 
     def __len__(self):
         """Return the total number of images in the dataset."""
         if self.opt.max_dataset_size == -1:
-            return len(self.A_paths)
+            return len(self.AB_paths)
         else:
             return self.opt.max_dataset_size
