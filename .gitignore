@@ -126,8 +126,6 @@ work_dirs/
 
 
 # paths
-scripts/**/**
-data/**/**
 *.txt
 *.jpg
 !*.py
