@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from torch import nn
 from tqdm import tqdm
+import glob
 
 from data import create_eval_dataloader
 from metric import get_fid, get_mIoU
@@ -46,7 +47,7 @@ class Pix2PixModel(BaseModel):
         parser.add_argument(
             '--real_stat_path',
             type=str,
-            required=True,
+            # required=True,
             help=
             'the path to load the groud-truth images information to compute FID.'
         )
@@ -138,7 +139,10 @@ class Pix2PixModel(BaseModel):
         self.fids, self.mIoUs = [], []
         self.is_best = False
         self.Tacts, self.Sacts = {}, {}
-        self.npz = np.load(opt.real_stat_path)
+        if opt.real_stat_path is None:
+            self.npz=glob.glob(f'{opt.dataroot}/train/train_B')[:5000]
+        else:
+            self.npz = np.load(opt.real_stat_path)
 
     def set_input(self, input):
         """Unpack input data from the dataloader and perform necessary pre-processing steps.
@@ -240,12 +244,15 @@ class Pix2PixModel(BaseModel):
                                                  '%s.png' % name),
                                     create_dir=True)
                 cnt += 1
-
-        fid = get_fid(fakes,
-                      self.inception_model,
-                      self.npz,
-                      device=self.device,
-                      batch_size=self.opt.eval_batch_size)
+        try:
+            fid = get_fid(fakes,
+                          self.inception_model,
+                          self.npz,
+                          device=self.device,
+                          batch_size=self.opt.eval_batch_size)
+        except:
+            print('cant calculate fid')
+            fid=100
         if fid < self.best_fid:
             self.is_best = True
             self.best_fid = fid

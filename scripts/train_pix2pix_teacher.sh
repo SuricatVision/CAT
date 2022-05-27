@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-python train.py --dataroot /media/dereyly/svision_ssd2/Dropbox/datasets/data_jpg/ffhq-metfaces_blended \
+python train.py --dataroot /home/dereyly/ImageDB/ffhq-metfaces_blended \
   --model pix2pix \
-  --log_dir logs/pix2pix/metaf2/inception/teacher \
+  --log_dir logs/pix2pix/metaf512/inception/teacher \
   --netG inception_9blocks \
-  --batch_size 32 \
+  --batch_size 16 \
   --lambda_recon 10 \
   --nepochs 500 --nepochs_decay 1000 \
-  --num_threads 32 \
+  --num_threads 16 \
   --gpu_ids 0,1 \
   --norm batch \
   --norm_affine \
@@ -17,4 +17,5 @@ python train.py --dataroot /media/dereyly/svision_ssd2/Dropbox/datasets/data_jpg
   --save_epoch_freq 10 --save_latest_freq 10000 \
   --eval_batch_size 16 \
   --direction AtoB \
-  --dataset_mode=aligned 
+  --dataset_mode=aligned \
+  --load_size=560 --crop_size=512

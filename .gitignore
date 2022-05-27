@@ -7,6 +7,7 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+logs
 .Python
 build/
 develop-eggs/
@@ -126,6 +127,7 @@ work_dirs/
 
 
 # paths
+*.png
 *.txt
 *.jpg
 !*.py
