@@ -14,7 +14,7 @@ from metric.mIoU_score import DRNSeg
 from utils import util
 from . import networks
 from .base_model import BaseModel
-from .modules.loss import GANLoss
+from .modules.loss import GANLoss,VGGLoss
 
 
 class Pix2PixModel(BaseModel):
@@ -34,7 +34,7 @@ class Pix2PixModel(BaseModel):
         parser.add_argument('--recon_loss_type',
                             type=str,
                             default='l1',
-                            choices=['l1', 'l2', 'smooth_l1'],
+                            choices=['l1', 'l2', 'smooth_l1','vgg'],
                             help='the type of the reconstruction loss')
         parser.add_argument('--lambda_recon',
                             type=float,
@@ -106,6 +106,8 @@ class Pix2PixModel(BaseModel):
             self.criterionRecon = torch.nn.MSELoss()
         elif opt.recon_loss_type == 'smooth_l1':
             self.criterionRecon = torch.nn.SmoothL1Loss()
+        elif opt.recon_loss_type == 'vgg':
+            self.criterionRecon = VGGLoss().to(self.device)
         else:
             raise NotImplementedError(
                 'Unknown reconstruction loss type [%s]!' % opt.loss_type)

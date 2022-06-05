@@ -245,12 +245,15 @@ class InceptionDistiller(BaseInceptionDistiller):
                                                      '%s.png' % name),
                                         create_dir=True)
                 cnt += 1
-
-        fid = get_fid(fakes,
-                      self.inception_model,
-                      self.npz,
-                      device=self.device,
-                      batch_size=self.opt.eval_batch_size)
+        try:
+            fid = get_fid(fakes,
+                          self.inception_model,
+                          self.npz,
+                          device=self.device,
+                          batch_size=self.opt.eval_batch_size)
+        except:
+            fid = 100
+            print('no FID')
         if fid < self.best_fid:
             self.is_best = True
             self.best_fid = fid

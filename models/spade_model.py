@@ -49,7 +49,7 @@ class SPADEModel(BaseModel):
             parser.add_argument(
                 '--real_stat_path',
                 type=str,
-                required=True,
+                required=False,
                 help=
                 'the path to load the groud-truth images information to compute FID.'
             )
