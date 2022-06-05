@@ -178,6 +178,7 @@ class VGG19(torch.nn.Module):
         h_relu3 = self.slice3(h_relu2)
         h_relu4 = self.slice4(h_relu3)
         h_relu5 = self.slice5(h_relu4)
+
         out = [h_relu1, h_relu2, h_relu3, h_relu4, h_relu5]
         return out
 
@@ -191,13 +192,23 @@ class VGGLoss(nn.Module):
         self.criterion = nn.L1Loss()
         self.weights = [1.0 / 32, 1.0 / 16, 1.0 / 8, 1.0 / 4, 1.0]
 
-    def forward(self, x, y):
+    def forward(self, x, y,mask=None):
         loss = 0
         x_vgg = self.vgg(x)
         with torch.no_grad():
             y_vgg = self.vgg(y)
 
         for i in range(len(x_vgg)):
-            loss += self.weights[i] * self.criterion(x_vgg[i],
+            if mask is None:
+                loss += self.weights[i] * self.criterion(x_vgg[i],
                                                      y_vgg[i].detach())
+            else:
+                sz=x_vgg[i].shape
+                # print(mask.shape,sz)
+                mask_i=torch.nn.functional.interpolate(mask.float(),(sz[2],sz[3])) #,mode='linear')
+                mask_i=mask_i.repeat(1,sz[1],1,1)>0 
+                loss += self.weights[i] * self.criterion(x_vgg[i][mask_i],
+                                                     y_vgg[i][mask_i].detach())
+            # print(x_vgg[i].shape,mask_i.shape)
+        
         return loss

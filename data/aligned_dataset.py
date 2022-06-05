@@ -1,6 +1,7 @@
 import os.path
 
 from PIL import Image
+import numpy as np
 
 from data.base_dataset import BaseDataset, get_params, get_transform
 from data.image_folder import make_dataset
@@ -34,27 +35,43 @@ class AlignedDataset(BaseDataset):
     def __getitem__(self, index):
         A_path = f'{self.dir_A}/{self.A_paths[index]}'
         B_path = f'{self.dir_A}/{self.A_paths[index]}'.replace('_A','_B')
+        mask_path = f'{self.dir_A}/../mask/{self.A_paths[index]}.png' #ToDo add opt.mask
 
         A = Image.open(A_path).convert('RGB')
         B = Image.open(B_path).convert('RGB')
-        # split AB image into A and B
-        # w, h = AB.size
-        # w2 = int(w / 2)
-        # A = AB.crop((0, 0, w2, h))
-        # B = AB.crop((w2, 0, w, h))
-
+        # mask = Image.fromarray(np.array(Image.open(mask_path))>0)
+        mask = Image.open(mask_path)
+        # A = mask*A
+        # B = mask*B
         # apply the same transform to both A and B
         transform_params = get_params(self.opt, A.size)
         A_transform = get_transform(self.opt,
                                     transform_params,
+                                    method=Image.BILINEAR,
                                     grayscale=(self.input_nc == 1))
         B_transform = get_transform(self.opt,
                                     transform_params,
+                                    method=Image.BILINEAR,
                                     grayscale=(self.output_nc == 1))
+        mask_transform = get_transform(self.opt,
+                                    transform_params,
+                                    normalized = False,
+                                    method=Image.BILINEAR)
+       
 
         A = A_transform(A)
         B = B_transform(B)
-        return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
+        mask = mask_transform(mask)>0 #.repeat(3,1,1) 
+
+        # print(A.shape,B.shape,mask.shape)
+        # xxx
+        # for i in range(3): #toDo maybe do it not so rough and f*ck PIL
+        #     # A[i][mask[0]==False]=-1
+        #     B[i][mask[0]==False]=-1
+
+
+
+        return {'A': A, 'B': B, 'mask':mask,'A_paths': A_path, 'B_paths': B_path}
 
     def __len__(self):
         """Return the total number of images in the dataset."""

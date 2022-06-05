@@ -111,6 +111,7 @@ class Pix2PixModel(BaseModel):
         else:
             raise NotImplementedError(
                 'Unknown reconstruction loss type [%s]!' % opt.loss_type)
+        self.recon_loss_type=opt.recon_loss_type
         self.optimizer_G = torch.optim.Adam(self.netG.parameters(),
                                             lr=opt.lr,
                                             betas=(opt.beta1, 0.999))
@@ -157,6 +158,9 @@ class Pix2PixModel(BaseModel):
         AtoB = self.opt.direction == 'AtoB'
         self.real_A = input['A' if AtoB else 'B'].to(self.device)
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
+        self.mask = None
+        if 'mask' in input:
+            self.mask = input['mask'].to(self.device)
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
     def forward(self):
@@ -182,12 +186,25 @@ class Pix2PixModel(BaseModel):
 
     def backward_G(self):
         """Calculate GAN and L1 loss for the generator"""
+        if self.mask is not None: #ToDo mask gradient
+            self.mask = self.mask.repeat(1,3,1,1)
+            self.real_A[self.mask==False]=-1
+            # self.fake_B[self.mask==False]=-1
+            # self.fake_B.grad[self.mask==False]=0
+            self.real_B[self.mask==False]=-1
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)
         pred_fake = self.netD(fake_AB)
         self.loss_G_gan = self.criterionGAN(
             pred_fake, True, for_discriminator=False) * self.opt.lambda_gan
-        self.loss_G_recon = self.criterionRecon(
-            self.fake_B, self.real_B) * self.opt.lambda_recon
+        
+        if self.recon_loss_type=='vgg':
+            self.loss_G_recon = self.criterionRecon(
+                self.fake_B, self.real_B, mask=self.mask) * self.opt.lambda_recon
+        else:
+            # self.mask=self.mask.repeat(1,3,1,1) 
+            self.loss_G_recon = self.criterionRecon(
+                self.fake_B[self.mask], self.real_B[self.mask]) * self.opt.lambda_recon
+        # self.loss_G_recon = self.criterionRecon( self.fake_B, self.real_B)* self.opt.lambda_recon
 
         if getattr(self.opt, 'lambda_comp_cost', 0) > 0:
             p = int(self.opt.comp_cost[-1])
