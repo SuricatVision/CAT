@@ -175,7 +175,7 @@ class BaseInceptionDistiller(BaseModel):
         elif opt.recon_loss_type == 'smooth_l1':
             self.criterionRecon = torch.nn.SmoothL1Loss()
         elif opt.recon_loss_type == 'vgg':
-            self.criterionRecon = models.modules.loss.VGGLoss(self.device)
+            self.criterionRecon = models.modules.loss.VGGLoss().to(self.device)
         else:
             raise NotImplementedError(
                 'Unknown reconstruction loss type [%s]!' % opt.loss_type)

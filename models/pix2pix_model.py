@@ -186,12 +186,12 @@ class Pix2PixModel(BaseModel):
 
     def backward_G(self):
         """Calculate GAN and L1 loss for the generator"""
-        if self.mask is not None: #ToDo mask gradient
-            self.mask = self.mask.repeat(1,3,1,1)
-            self.real_A[self.mask==False]=-1
-            # self.fake_B[self.mask==False]=-1
-            # self.fake_B.grad[self.mask==False]=0
-            self.real_B[self.mask==False]=-1
+        # if self.mask is not None: #ToDo mask gradient
+        #     self.mask = self.mask.repeat(1,3,1,1)
+        #     self.real_A[self.mask==False]=-1
+        #     # self.fake_B[self.mask==False]=-1
+        #     # self.fake_B.grad[self.mask==False]=0
+        #     self.real_B[self.mask==False]=-1
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)
         pred_fake = self.netD(fake_AB)
         self.loss_G_gan = self.criterionGAN(
