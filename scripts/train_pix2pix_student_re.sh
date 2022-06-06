@@ -8,9 +8,9 @@ python distill.py --dataroot /home/nsergievskiy/ImageDB/metaf \
   --teacher_netG inception_9blocks --student_netG inception_9blocks \
   --pretrained_ngf 128 --teacher_ngf 128 --student_ngf 64 \
   --real_stat_path /home/nsergievskiy/ImageDB/metaf/images_b.npz \
-  --num_threads 20 \
+  --num_threads 8 \
   --eval_batch_size 2 \
-  --batch_size 40 \
+  --batch_size 16 \
   --gpu_ids 0 \
   --norm batch \
   --norm_affine \
@@ -24,9 +24,9 @@ python distill.py --dataroot /home/nsergievskiy/ImageDB/metaf \
   --target_flops 10.6e9 \
   --distill_G_loss_type ka \
   --recon_loss_type=vgg  --lambda_recon 10 \
-  --prune_continue \
-  --pretrained_student_G_path=/home/nsergievskiy/progs/CAT/logs/pix2pix/metaf2/inception/student64/4p6B/checkpoints/155_net_G.pth \
-  --restore_D_path /home/nsergievskiy/progs/CAT/logs/pix2pix/metaf2/inception/student64/4p6B/checkpoints/155_net_D.pth 
+  --restore_D_path /home/nsergievskiy/progs/CAT/logs/pix2pix/metaf2/inception/student64/4p6B/checkpoints/155_net_D.pth \
+  --prune_continue --pretrained_student_G_path=/home/nsergievskiy/progs/CAT/logs/pix2pix/metaf2/inception/student64/4p6B/checkpoints/155_net_G.pth \
+
   # --restore_O_path=/home/nsergievskiy/progs/CAT/logs/pix2pix/metaf2/inception/student64/4p6B/checkpoints/150_optim \
 
   #--prune_continue 

@@ -97,9 +97,6 @@ class DistillOptions(BaseOptions):
             help=
             'the reduction factor for channel numbers for different kernel sizes'
         )
-        parser.add_argument('--data_width', type=int, default=256),
-        parser.add_argument('--data_height', type=int, default=256),
-        parser.add_argument('--data_channel', type=int, default=3),
         parser.add_argument('--kernel_sizes',
                             nargs='+',
                             type=int,
@@ -182,7 +179,7 @@ class DistillOptions(BaseOptions):
         parser.add_argument(
             '--real_stat_path',
             type=str,
-            required=False,
+            required=True,
             help=
             'the path to load the ground-truth images information to compute FID.'
         )

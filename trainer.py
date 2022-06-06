@@ -23,7 +23,9 @@ from utils.logger import Logger
 from utils.common import shrink
 
 from models.networks import init_net
+import warnings
 
+warnings.filterwarnings("ignore")
 
 def set_seed(seed):
     cudnn.benchmark = False
