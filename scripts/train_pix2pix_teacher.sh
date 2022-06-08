@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=3
 python train.py --dataroot /home/nsergievskiy/ImageDB/metaf \
   --model pix2pix \
-  --log_dir logs/pix2pix/metaf2/inception/teacher128_vgg_4 \
+  --log_dir logs/pix2pix/metaf2/inception/teacher128_vgg_mask2 \
+  --real_stat_path /home/nsergievskiy/ImageDB/metaf/images_b.npz \
   --netG inception_9blocks \
   --batch_size 14 \
   --lambda_recon 10 \
@@ -20,8 +21,8 @@ python train.py --dataroot /home/nsergievskiy/ImageDB/metaf \
   --direction AtoB \
   --dataset_mode=aligned \
   --ngf=128 \
-  --load_size=256  --recon_loss_type=vgg \
-  --restore_G_path logs/pix2pix/metaf2/inception/teacher128_vgg_4/checkpoints/latest_net_G.pth \
-  --restore_D_path logs/pix2pix/metaf2/inception/teacher128_vgg_4/checkpoints/latest_net_D.pth
+  --restore_G_path logs/pix2pix/metaf2/inception/teacher128_vgg_mask2/checkpoints/latest_net_G.pth \
+  --restore_D_path logs/pix2pix/metaf2/inception/teacher128_vgg_mask2/checkpoints/latest_net_D.pth \
+  --recon_loss_type=vgg \
   # 
   #

@@ -169,6 +169,12 @@ class Pix2PixModel(BaseModel):
 
     def backward_D(self):
         """Calculate GAN loss for the discriminator"""
+        if self.mask is not None: #ToDo mask gradient
+            mask = self.mask.repeat(1,3,1,1)
+            self.fake_B=self.fake_B*mask
+            # self.fake_B.grad[self.mask==False]=0
+            self.real_B=self.real_B*mask
+            self.real_A=self.real_A*mask
         fake_AB = torch.cat((self.real_A, self.fake_B), 1).detach()
         real_AB = torch.cat((self.real_A, self.real_B), 1).detach()
         pred_fake = self.netD(fake_AB)
@@ -186,26 +192,26 @@ class Pix2PixModel(BaseModel):
 
     def backward_G(self):
         """Calculate GAN and L1 loss for the generator"""
-        # if self.mask is not None: #ToDo mask gradient
-        #     self.mask = self.mask.repeat(1,3,1,1)
-        #     self.real_A[self.mask==False]=-1
-        #     # self.fake_B[self.mask==False]=-1
-        #     # self.fake_B.grad[self.mask==False]=0
-        #     self.real_B[self.mask==False]=-1
+        if self.mask is not None: #ToDo mask gradient
+            mask = self.mask.repeat(1,3,1,1)
+            self.fake_B=self.fake_B*mask
+            # self.fake_B.grad[self.mask==False]=0
+            self.real_B=self.real_B*mask
+            self.real_A=self.real_A*mask
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)
         pred_fake = self.netD(fake_AB)
         self.loss_G_gan = self.criterionGAN(
             pred_fake, True, for_discriminator=False) * self.opt.lambda_gan
         
-        if self.recon_loss_type=='vgg':
-            self.loss_G_recon = self.criterionRecon(
-                self.fake_B, self.real_B, mask=self.mask) * self.opt.lambda_recon
-        else:
-            # self.mask=self.mask.repeat(1,3,1,1) 
-            self.loss_G_recon = self.criterionRecon(
-                self.fake_B[self.mask], self.real_B[self.mask]) * self.opt.lambda_recon
-        # self.loss_G_recon = self.criterionRecon( self.fake_B, self.real_B)* self.opt.lambda_recon
-
+        # if self.recon_loss_type=='vgg':
+        #     self.loss_G_recon = self.criterionRecon(
+        #         self.fake_B, self.real_B, mask=self.mask) * self.opt.lambda_recon
+        # else:
+        #     # self.mask=self.mask.repeat(1,3,1,1) 
+        #     self.loss_G_recon = self.criterionRecon(
+        #         self.fake_B[self.mask], self.real_B[self.mask]) * self.opt.lambda_recon
+        self.loss_G_recon = self.criterionRecon( self.fake_B, self.real_B)* self.opt.lambda_recon
+        
         if getattr(self.opt, 'lambda_comp_cost', 0) > 0:
             p = int(self.opt.comp_cost[-1])
             self.loss_G_comp_cost = getattr(

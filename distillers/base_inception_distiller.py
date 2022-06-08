@@ -166,6 +166,7 @@ class BaseInceptionDistiller(BaseModel):
                                       opt.dataset_mode)
 
         self.netG_teacher.eval()
+        self.recon_loss_type=opt.recon_loss_type
         self.criterionGAN = models.modules.loss.GANLoss(opt.gan_mode).to(
             self.device)
         if opt.recon_loss_type == 'l1':
@@ -280,6 +281,9 @@ class BaseInceptionDistiller(BaseModel):
             AtoB = self.opt.direction == 'AtoB'
             self.real_A = input['A' if AtoB else 'B'].to(self.device)
             self.real_B = input['B' if AtoB else 'A'].to(self.device)
+            self.mask = None
+            if 'mask' in input:
+                self.mask = input['mask'].to(self.device)
             self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
     def set_single_input(self, input):

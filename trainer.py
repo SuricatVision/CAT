@@ -24,6 +24,8 @@ from utils.common import shrink
 
 from models.networks import init_net
 
+import warnings
+warnings.filterwarnings("ignore")
 
 def set_seed(seed):
     cudnn.benchmark = False
@@ -103,13 +105,15 @@ class Trainer:
         logger = self.logger
 
         if self.task == 'distill':
+            print(opt.restore_student_G_path)
+            # if opt.restore_student_G_path is None:
             shrink(model, opt)
             modules_on_one_gpu.netG_student = init_net(
                 modules_on_one_gpu.netG_student, opt.init_type, opt.init_gain,
                 []).to(model.device)
             if opt.restore_student_G_path is not None:
                 model.load_networks(prune_continue=True)
-                logger.print_info('All networks loaded.')
+                logger.print_info('-------- > All networks loaded <----------')
             model.print_networks()
             if 'spade' in self.opt.distiller:
                 logger.print_info(

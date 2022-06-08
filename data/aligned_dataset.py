@@ -67,7 +67,7 @@ class AlignedDataset(BaseDataset):
         # xxx
         # for i in range(3): #toDo maybe do it not so rough and f*ck PIL
         #     # A[i][mask[0]==False]=-1
-        #     B[i][mask[0]==False]=-1
+        #     B[i][mask[0]==False]=0
 
 
 

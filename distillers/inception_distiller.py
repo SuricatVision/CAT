@@ -161,13 +161,21 @@ class InceptionDistiller(BaseInceptionDistiller):
 
     def backward_G(self, steps):
         if self.opt.dataset_mode == 'aligned':
-            self.loss_G_recon = self.criterionRecon(
-                self.Sfake_B, self.real_B) * self.opt.lambda_recon
+            # self.loss_G_recon = self.criterionRecon(
+            #     self.Sfake_B, self.real_B) * self.opt.lambda_recon
+            if self.recon_loss_type=='vgg':
+                self.loss_G_recon = self.criterionRecon(
+                    self.Sfake_B, self.real_B, mask=self.mask) * self.opt.lambda_recon
+            else:
+                self.mask=self.mask.repeat(1,3,1,1) 
+                self.loss_G_recon = self.criterionRecon(
+                    self.Sfake_B[self.mask], self.real_B[self.mask]) * self.opt.lambda_recon
             fake = torch.cat((self.real_A, self.Sfake_B), 1)
         else:
             self.loss_G_recon = self.criterionRecon(
                 self.Sfake_B, self.Tfake_B) * self.opt.lambda_recon
             fake = self.Sfake_B
+            stop
         pred_fake = self.netD(fake)
         self.loss_G_gan = self.criterionGAN(
             pred_fake, True, for_discriminator=False) * self.opt.lambda_gan

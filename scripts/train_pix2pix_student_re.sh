@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 python distill.py --dataroot /home/nsergievskiy/ImageDB/metaf \
   --distiller inception \
   --log_dir logs/pix2pix/metaf2/inception/student_64_vgg/4p6B \
@@ -25,7 +25,7 @@ python distill.py --dataroot /home/nsergievskiy/ImageDB/metaf \
   --distill_G_loss_type ka \
   --recon_loss_type=vgg  --lambda_recon 10 \
   --prune_continue \
-  --pretrained_student_G_path=/home/nsergievskiy/progs/CAT/logs/pix2pix/metaf2/inception/student64/4p6B/checkpoints/155_net_G.pth \
+  --restore_student_G_path=/home/nsergievskiy/progs/CAT/logs/pix2pix/metaf2/inception/student64/4p6B/checkpoints/155_net_G.pth \
   --restore_D_path /home/nsergievskiy/progs/CAT/logs/pix2pix/metaf2/inception/student64/4p6B/checkpoints/155_net_D.pth 
   # --restore_O_path=/home/nsergievskiy/progs/CAT/logs/pix2pix/metaf2/inception/student64/4p6B/checkpoints/150_optim \
 
